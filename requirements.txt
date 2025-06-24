@@ -6,3 +6,5 @@ opencv-python>=4.10
 tensorboard>=2.16
 Faker>=18.9.0
 Pillow>=9.5.0
+onnx 
+onnxruntime
