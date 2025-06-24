@@ -5,9 +5,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 fake = Faker('ru_RU')
 
-FONTS_DIR  = 'fonts'
-CROPS_DIR  = 'crops'
-OUTPUT_DIR = 'dataset'
+FONTS_DIR  = '/content/font_classifier/fonts'
+CROPS_DIR  = '/content/font_classifier/crops'
+OUTPUT_DIR = '/content/font_classifier/dataset'
 
 CATEGORIES = ['printed', 'handwritten']
 FIELDS = {
@@ -16,6 +16,7 @@ FIELDS = {
     'third_name':   'patronymic'
 }
 
+# Считаем шрифты
 fonts = {
     cat: [
         os.path.join(FONTS_DIR, cat, fname)
@@ -25,6 +26,7 @@ fonts = {
     for cat in CATEGORIES
 }
 
+# Считаем кропы
 crops = {
     key: os.path.join(CROPS_DIR, f"{key}.png")
     for key in FIELDS
@@ -35,13 +37,12 @@ for cat in CATEGORIES:
     for field_key in FIELDS:
         os.makedirs(os.path.join(OUTPUT_DIR, cat, field_key), exist_ok=True)
 
-def generate_dataset(num_samples=1000):
+def generate_dataset(num_samples=2000):
     for i in range(num_samples):
-        # Генерируем ФИО
-        first       = fake.first_name()
-        last        = fake.last_name()
-        patronymic  = fake.middle_name()
-        texts       = {'name': first, 'second_name': last, 'third_name': patronymic}
+        first      = fake.first_name()
+        last       = fake.last_name()
+        patronymic = fake.middle_name()
+        texts      = {'name': first, 'second_name': last, 'third_name': patronymic}
 
         for cat in CATEGORIES:
             font_path = random.choice(fonts[cat])
@@ -49,18 +50,25 @@ def generate_dataset(num_samples=1000):
                 bg   = Image.open(crops[field_key]).convert('RGB')
                 draw = ImageDraw.Draw(bg)
 
+                # Подбираем размер шрифта
                 font_size = min(bg.width, bg.height)
-                font      = ImageFont.truetype(font_path, font_size)
                 max_w     = bg.width * 0.9
+                font      = ImageFont.truetype(font_path, font_size)
+                bbox      = draw.textbbox((0, 0), text, font=font)
+                text_w    = bbox[2] - bbox[0]
 
-                while font.getsize(text)[0] > max_w and font_size > 10:
+                while text_w > max_w and font_size > 10:
                     font_size -= 2
-                    font = ImageFont.truetype(font_path, font_size)
+                    font   = ImageFont.truetype(font_path, font_size)
+                    bbox   = draw.textbbox((0, 0), text, font=font)
+                    text_w = bbox[2] - bbox[0]
 
-                w, h      = draw.textsize(text, font=font)
-                position  = ((bg.width - w) / 2, (bg.height - h) / 2)
+                # Размеры для центрирования
+                text_h = bbox[3] - bbox[1]
+                pos_x  = (bg.width  - text_w) / 2
+                pos_y  = (bg.height - text_h) / 2
 
-                draw.text(position, text, font=font, fill=(0, 0, 0))
+                draw.text((pos_x, pos_y), text, font=font, fill=(0, 0, 0))
 
                 filename = f"{i:06d}_{cat}_{field_key}.png"
                 save_dir = os.path.join(OUTPUT_DIR, cat, field_key)
