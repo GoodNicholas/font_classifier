@@ -2,7 +2,7 @@ import torch
 import timm
 
 CKPT_PATH   = '/content/checkpoints/swin_best_0.9970.pt'
-ONNX_PATH   = 'swin_classifier.onnx'
+ONNX_PATH   = '/content/font_classifier/swin_classifier.onnx'
 IMG_SIZE    = 224
 DEVICE      = 'cpu'
 
