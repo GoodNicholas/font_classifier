@@ -6,5 +6,15 @@ opencv-python>=4.10
 tensorboard>=2.16
 Faker>=18.9.0
 Pillow>=9.5.0
-onnx 
-onnxruntime
+onnx>=1.15
+onnxruntime>=1.15
+
+transformers>=4.25
+tokenizers>=0.13
+sentencepiece>=0.1.98
+
+tensorflow>=2.12
+numpy>=1.24
+tqdm>=4.65
+scikit-learn>=1.2
+matplotlib>=3.7
